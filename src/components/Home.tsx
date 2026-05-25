@@ -162,9 +162,7 @@ export default function Home({
             <p className="text-xs text-slate-500 mt-1">Check out our general catalog for more choices!</p>
           </div>
         ) : (
-          <div className={`grid gap-4 md:gap-6 ${
-            isMobileLayout ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-4'
-          }`}>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
             {featuredProducts.map((p) => (
               <div 
                 key={p.id} 

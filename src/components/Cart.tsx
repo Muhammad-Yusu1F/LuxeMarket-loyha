@@ -139,9 +139,9 @@ export default function Cart({
           </span>
         </div>
       ) : (
-        <div className={`grid gap-6 ${isMobileLayout ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-11'}`} id="cart-checkout-grid">
+        <div className="grid grid-cols-1 lg:grid-cols-11 gap-6" id="cart-checkout-grid">
           {/* Left panel */}
-          <div className={`${isMobileLayout ? '' : 'lg:col-span-6'} space-y-4`}>
+          <div className="lg:col-span-6 space-y-4">
             {showCheckoutForm ? (
               /* High-End Order Checkout Form */
               <div className={`rounded-2xl p-6 border shadow-sm space-y-6 ${
@@ -375,7 +375,7 @@ export default function Cart({
           </div>
 
           {/* Right panel summary */}
-          <div className={`${isMobileLayout ? '' : 'lg:col-span-5'} space-y-4`}>
+          <div className="lg:col-span-5 space-y-4">
             <div className={`backdrop-blur-sm rounded-xl p-5 border shadow-sm space-y-4 transition-colors ${
               darkMode ? 'bg-[#111726]/90 border-[#1e293b]' : 'bg-[#dee9fc]/70 border-[#c2c6d6]/40'
             }`}>

@@ -222,295 +222,326 @@ export default function App() {
   const activeProduct = PRODUCTS.find(p => p.id === selectedProductId) || PRODUCTS[0];
 
   return (
-    <div className="w-full min-h-screen bg-[#0f172a] bg-gradient-to-tr from-[#0f172a] via-[#1e293b] to-[#334155] md:p-6 lg:p-12 flex flex-col items-center justify-center transition-all duration-300 relative overflow-x-hidden">
+    <div className={`w-full min-h-screen transition-colors duration-300 flex flex-col ${
+      darkMode ? 'bg-[#090d16] text-[#f1f5f9]' : 'bg-[#f8f9ff] text-[#121c2a]'
+    }`}>
       
-      {/* Dynamic Device Switcher Panel on Desktop Screen */}
-      <div className="hidden md:flex items-center justify-between bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full shadow-2xl fixed top-4 z-50 gap-4 mb-4 select-none animate-fade-in">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[10px] font-bold text-white/90 uppercase tracking-widest font-sans">LUXE Preview</span>
-        </div>
-        <div className="h-4 w-[1px] bg-white/20" />
-        <div className="flex bg-black/40 rounded-full p-0.5 border border-white/5">
-          <button 
-            type="button"
-            onClick={() => setDeviceMode('responsive')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold select-none transition-all duration-200 ${
-              deviceMode === 'responsive' 
-                ? 'bg-[#2170e4] text-white shadow-md scale-105' 
-                : 'text-white/60 hover:text-white'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[14px]">devices</span>
-            Wide Web (PC)
-          </button>
-          <button 
-            type="button"
-            onClick={() => setDeviceMode('mobile')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold select-none transition-all duration-200 ${
-              deviceMode === 'mobile' 
-                ? 'bg-[#2170e4] text-white shadow-md scale-105' 
-                : 'text-white/60 hover:text-white'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[14px]">smartphone</span>
-            Mobile App
-          </button>
+      {/* Uzum-style Top Auxiliary Bar (Hidden on Mobile) */}
+      <div className={`hidden md:block border-b text-xs transition-colors py-2 px-6 ${
+        darkMode ? 'bg-[#05070c]/90 border-[#1e293b]/70 text-slate-400' : 'bg-[#eff4ff]/70 border-[#dee9fc]/70 text-[#5e6572]'
+      }`}>
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-4 select-none">
+            <span className="flex items-center gap-1 cursor-pointer hover:text-[#2170e4] transition-colors">
+              <span className="material-symbols-outlined text-base">pin_drop</span>
+              <span>Shahar: Toshkent</span>
+            </span>
+            <span className="hover:text-[#2170e4] transition-colors cursor-pointer">Topshirish punktlari</span>
+          </div>
+          <div className="flex items-center gap-5">
+            <span className="hover:text-[#2170e4] transition-colors cursor-pointer font-medium">Sotuvchi bo'lish</span>
+            <span className="hover:text-[#2170e4] transition-colors cursor-pointer">Savol-javoblar</span>
+            <span className="hover:text-[#2170e4] transition-colors cursor-pointer text-[#2170e4] font-medium" onClick={() => setCurrentScreen('ADMIN')}>
+              🛡️ Buyurtmalarim (Admin)
+            </span>
+            <span className="text-[11px] bg-[#2170e4]/10 text-[#2170e4] px-2 py-0.5 rounded font-mono">
+              {userEmail}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Main Container Wrapper */}
-      <div 
-        style={deviceMode === 'mobile' ? { transform: 'translate(0)' } : undefined}
-        className={`font-sans flex flex-col relative transition-all duration-500 w-full ${
-          darkMode 
-            ? 'bg-[#090d16] text-[#f1f5f9]' 
-            : 'bg-[#f8f9ff] text-[#121c2a]'
-        } ${
-          deviceMode === 'mobile'
-            ? 'h-[844px] max-w-[390px] rounded-[48px] border-[12px] border-slate-900 shadow-2xl overflow-hidden'
-            : 'min-h-screen md:min-h-[850px] max-w-lg md:max-w-5xl lg:max-w-6xl md:rounded-3xl md:shadow-2xl md:border md:border-[#dee9fc]/65 overflow-hidden'
-        }`}
-      >
-        {/* Notch / Status Bar simulator for mobile frame view on desktop */}
-        {deviceMode === 'mobile' && (
-          <div className={`px-6 pt-3 pb-1 flex justify-between items-center text-[10px] uppercase tracking-wider font-bold select-none border-b z-50 shrink-0 ${
-            darkMode 
-              ? 'bg-[#090d16] text-slate-300 border-[#1e293b]' 
-              : 'bg-white text-slate-700 border-slate-100'
-          }`}>
-            <span>12:00</span>
-            <div className="w-24 h-4.5 bg-black rounded-b-xl absolute left-1/2 -translate-x-1/2 top-0" />
-            <div className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-[11px]">signal_cellular_4_bar</span>
-              <span className="material-symbols-outlined text-[11px]">wifi</span>
-              <span className="material-symbols-outlined text-[13px]">battery_full</span>
-            </div>
+      {/* Top Application Header */}
+      <header className={`sticky top-0 w-full z-45 backdrop-blur-md border-b transition-colors ${
+        darkMode 
+          ? 'bg-[#090d16]/95 border-[#1e293b]' 
+          : 'bg-white/95 border-[#dee9fc]/60 shadow-xs'
+      }`}>
+        <div className="max-w-7xl mx-auto flex justify-between items-center px-4 md:px-6 h-16 sm:h-20 gap-4">
+          
+          {/* Logo & Menu Trigger */}
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className={`text-[#2170e4] hover:opacity-85 active:scale-95 transition-all w-10 h-10 flex items-center justify-center rounded-full ${
+                darkMode ? 'hover:bg-slate-800' : 'hover:bg-[#eff4ff]'
+              }`}
+              title="Katalog menyusi"
+            >
+              <span className="material-symbols-outlined select-none text-2xl font-bold">menu</span>
+            </button>
+            <h1 
+              onClick={() => setCurrentScreen('HOME')}
+              className="font-extrabold text-2xl sm:text-3xl text-[#2170e4] tracking-wider hover:opacity-90 active:scale-95 transition-all select-none cursor-pointer"
+            >
+              LUXE
+            </h1>
           </div>
-        )}
 
-        {/* Top Application Header (Suppressed on PRODUCT_DETAIL as shown in Mockup 3) */}
-        {currentScreen !== 'PRODUCT_DETAIL' && (
-          <header className={`sticky top-0 w-full z-45 backdrop-blur-md flex justify-between items-center px-4 h-16 border-b shrink-0 transition-colors ${
-            darkMode 
-              ? 'bg-[#090d16]/95 border-[#1e293b]' 
-              : 'bg-white/95 border-[#dee9fc]/60'
-          }`}>
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => setIsSidebarOpen(true)}
-                className={`text-[#2170e4] hover:opacity-85 active:scale-95 transition-all w-10 h-10 flex items-center justify-center rounded-full ${
-                  darkMode ? 'hover:bg-slate-800' : 'hover:bg-[#eff4ff]'
-                }`}
-                title="Open menu"
-              >
-                <span className="material-symbols-outlined select-none text-2xl">menu</span>
-              </button>
-              <h1 
-                onClick={() => setCurrentScreen('HOME')}
-                className="font-bold text-2xl text-[#2170e4] tracking-tight hover:opacity-90 active:scale-95 transition-all select-none cursor-pointer"
-              >
-                LUXE
-              </h1>
+          {/* Desktop Banner Search Input in Header (Uzum style) */}
+          <div className="hidden md:flex flex-1 max-w-xl relative">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <span className={`material-symbols-outlined ${darkMode ? 'text-slate-400' : 'text-[#727785]'}`}>search</span>
             </div>
-            <div className="flex items-center gap-3">
+            <input 
+              className={`block w-full pl-11 pr-12 py-2.5 rounded-xl outline-none border transition-all duration-300 font-medium text-sm ${
+                darkMode 
+                  ? 'bg-[#172036] border-[#1e293b] text-white focus:ring-1 focus:ring-[#2170e4]' 
+                  : 'bg-[#f0f3fd] border-[#dee9fc] text-[#121c2a] focus:ring-1 focus:ring-[#2170e4] focus:bg-white'
+              }`} 
+              placeholder="Mahsulotlar va turkumlar bo'yicha izlash..." 
+              type="text"
+              value={searchKeyword}
+              onChange={(e) => {
+                setSearchKeyword(e.target.value);
+                if (currentScreen !== 'CATALOG') {
+                  setCurrentScreen('CATALOG');
+                }
+              }}
+            />
+            {searchKeyword && (
               <button 
-                onClick={() => setCurrentScreen('CART')}
-                className={`relative text-[#2170e4] hover:opacity-85 active:scale-95 transition-all w-10 h-10 flex items-center justify-center rounded-full ${
-                  darkMode ? 'hover:bg-slate-800' : 'hover:bg-[#eff4ff]'
-                }`}
-                title="View shopping bag"
+                type="button" 
+                onClick={() => setSearchKeyword('')}
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#727785] hover:text-[#121c2a]"
               >
-                <span className="material-symbols-outlined select-none text-2xl">shopping_bag</span>
-                {cartBadgeCount > 0 && (
-                  <span className={`absolute -top-1 -right-1 w-5 h-5 bg-[#2170e4] text-white text-[10px] uppercase font-bold flex items-center justify-center rounded-full animate-pulse border ${
-                    darkMode ? 'border-[#090d16]' : 'border-white'
-                  }`}>
-                    {cartBadgeCount}
-                  </span>
-                )}
+                <span className="material-symbols-outlined text-sm">close</span>
               </button>
-            </div>
-          </header>
-        )}
+            )}
+          </div>
 
-        {/* Main Content Pane (Adds scroll inside forced phone enclosure) */}
-        <main className={`flex-grow px-4 ${currentScreen === 'PRODUCT_DETAIL' ? 'pt-0' : 'pt-2'} pb-28 ${
-          deviceMode === 'mobile' ? 'overflow-y-auto no-scrollbar' : ''
-        }`}>
-          {currentScreen === 'HOME' && (
-            <Home 
-              onSelectProduct={handleSelectProduct}
-              onAddToCart={handleAddToCart}
-              onNavigate={setCurrentScreen}
-              setSearchKeywordFilter={setSearchKeyword}
-              isMobileLayout={deviceMode === 'mobile'}
-              darkMode={darkMode}
-            />
-          )}
-
-          {currentScreen === 'CATALOG' && (
-            <Catalog 
-              onSelectProduct={handleSelectProduct}
-              onAddToCart={handleAddToCart}
-              keywordFilter={searchKeyword}
-              setKeywordFilter={setSearchKeyword}
-              isMobileLayout={deviceMode === 'mobile'}
-              darkMode={darkMode}
-            />
-          )}
-
-          {currentScreen === 'PRODUCT_DETAIL' && (
-            <ProductDetail 
-              product={activeProduct}
-              onBack={() => {
+          {/* Header Action Controls */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            
+            {/* Quick search button for mobile view */}
+            <button 
+              onClick={() => {
                 setCurrentScreen('CATALOG');
               }}
-              onAddToCart={handleAddToCart}
-              onShare={handleShareProduct}
-              isMobileLayout={deviceMode === 'mobile'}
-              darkMode={darkMode}
-            />
-          )}
-
-          {currentScreen === 'CART' && (
-            <Cart 
-              cartItems={cartItems}
-              onUpdateQuantity={handleUpdateQuantity}
-              onRemoveItem={handleRemoveItem}
-              onClearCart={handleClearCart}
-              onCheckoutComplete={handleCheckoutComplete}
-              isMobileLayout={deviceMode === 'mobile'}
-              darkMode={darkMode}
-            />
-          )}
-
-          {currentScreen === 'PROFILE' && (
-            <Profile 
-              userEmail={userEmail}
-              onChangeEmail={setUserEmail}
-              darkMode={darkMode}
-            />
-          )}
-
-          {currentScreen === 'ADMIN' && (
-            <Admin 
-              orders={orders} 
-              onUpdateOrderStatus={handleUpdateOrderStatus} 
-              products={PRODUCTS} 
-              onResetDatabase={handleResetDatabase}
-              darkMode={darkMode}
-            />
-          )}
-        </main>
-
-        {/* Floating System Toast Alerts */}
-        <div 
-          className={`absolute bottom-[80px] left-1/2 -translate-x-1/2 bg-[#27313f] text-[#eaf1ff] px-5 py-3 rounded-full text-xs font-semibold shadow-2xl z-[100] transition-all duration-300 flex items-center gap-2 max-w-xs whitespace-nowrap pointer-events-none ${
-            toastMessage ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
-          }`}
-        >
-          <span className="material-symbols-outlined text-emerald-400 text-sm">offline_pin</span>
-          <span>{toastMessage}</span>
-        </div>
-
-        {/* Premium Drawer Side Menu */}
-        <Sidebar 
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          onNavigate={setCurrentScreen}
-          currentScreen={currentScreen}
-          userEmail={userEmail}
-          darkMode={darkMode}
-          onToggleDarkMode={() => setDarkMode(!darkMode)}
-        />
-
-        {/* Bottom Nav indicators */}
-        <nav className={`absolute bottom-0 left-0 w-full z-45 border-t shadow-lg flex justify-center py-2 px-4 h-16 transition-colors ${
-          darkMode ? 'bg-[#090d16] border-[#1e293b]' : 'bg-white border-[#dee9fc]'
-        } ${
-          deviceMode === 'responsive'
-            ? `md:fixed md:bottom-4 md:left-1/2 md:-translate-x-1/2 md:max-w-md md:rounded-full md:border md:shadow-2xl ${
-                darkMode ? 'md:bg-[#090d16]/95 md:border-[#1e293b]' : 'md:bg-white/95 md:border-[#dee9fc]/60'
-              }`
-            : ''
-        }`}>
-          <div className="flex justify-around items-center w-full max-w-lg relative">
-            <button 
-              onClick={() => setCurrentScreen('HOME')}
-              className={`flex flex-col items-center justify-center transition-all duration-150 active:scale-90 ${
-                currentScreen === 'HOME' 
-                  ? 'text-[#2170e4] font-semibold scale-105' 
-                  : (darkMode ? 'text-slate-400 hover:text-white' : 'text-[#5e6572] hover:text-[#2170e4]')
+              className={`md:hidden text-[#2170e4] hover:opacity-85 active:scale-95 transition-all w-10 h-10 flex items-center justify-center rounded-full ${
+                darkMode ? 'hover:bg-slate-800' : 'hover:bg-[#eff4ff]'
               }`}
+              title="Izlash"
             >
-              <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: currentScreen === 'HOME' ? "'FILL' 1" : "'FILL' 0" }}>
-                home
-              </span>
-              <span className="text-[10px] mt-0.5 tracking-wide">Home</span>
-              {currentScreen === 'HOME' && (
-                <span className="w-1 h-1 bg-[#2170e4] rounded-full mt-0.5 absolute bottom-0.5" />
-              )}
+              <span className="material-symbols-outlined select-none text-2xl">search</span>
             </button>
 
+            {/* Dark Mode switcher inside Header */}
             <button 
-              onClick={() => setCurrentScreen('CATALOG')}
-              className={`flex flex-col items-center justify-center transition-all duration-150 active:scale-90 ${
-                currentScreen === 'CATALOG' 
-                  ? 'text-[#2170e4] font-semibold scale-105' 
-                  : (darkMode ? 'text-slate-400 hover:text-white' : 'text-[#5e6572] hover:text-[#2170e4]')
+              onClick={() => setDarkMode(!darkMode)}
+              className={`text-[#2170e4] hover:opacity-85 active:scale-95 transition-all w-10 h-10 flex items-center justify-center rounded-full ${
+                darkMode ? 'hover:bg-slate-800' : 'hover:bg-[#eff4ff]'
               }`}
+              title="Goralashtirish"
             >
-              <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: currentScreen === 'CATALOG' ? "'FILL' 1" : "'FILL' 0" }}>
-                search
+              <span className="material-symbols-outlined select-none text-2xl">
+                {darkMode ? 'light_mode' : 'dark_mode'}
               </span>
-              <span className="text-[10px] mt-0.5 tracking-wide">Search</span>
-              {currentScreen === 'CATALOG' && (
-                <span className="w-1 h-1 bg-[#2170e4] rounded-full mt-0.5 absolute bottom-0.5" />
-              )}
             </button>
 
+            {/* Admin Panel button */}
+            <button 
+              onClick={() => setCurrentScreen('ADMIN')}
+              className={`hidden sm:flex text-[#2170e4] hover:opacity-85 active:scale-95 transition-all w-10 h-10 items-center justify-center rounded-full ${
+                currentScreen === 'ADMIN' ? (darkMode ? 'bg-amber-500/15 text-amber-500' : 'bg-amber-50 text-amber-600') : (darkMode ? 'hover:bg-slate-800' : 'hover:bg-[#eff4ff]')
+              }`}
+              title="Merchant Admin Panel"
+            >
+              <span className="material-symbols-outlined select-none text-2xl">admin_panel_settings</span>
+            </button>
+
+            {/* Profile Navigation */}
+            <button 
+              onClick={() => setCurrentScreen('PROFILE')}
+              className={`text-[#2170e4] hover:opacity-85 active:scale-95 transition-all w-10 h-10 flex items-center justify-center rounded-full ${
+                currentScreen === 'PROFILE' ? 'bg-[#2170e4]/10' : (darkMode ? 'hover:bg-slate-800' : 'hover:bg-[#eff4ff]')
+              }`}
+              title="Luxe Profil"
+            >
+              <span className="material-symbols-outlined select-none text-2xl" style={{ fontVariationSettings: currentScreen === 'PROFILE' ? "'FILL' 1" : "'FILL' 0" }}>
+                person
+              </span>
+            </button>
+
+            {/* Shopping Bag Checkout cart */}
             <button 
               onClick={() => setCurrentScreen('CART')}
-              className={`flex flex-col items-center justify-center transition-all duration-150 active:scale-90 relative ${
-                currentScreen === 'CART' 
-                  ? 'text-[#2170e4] font-semibold scale-105' 
-                  : (darkMode ? 'text-slate-400 hover:text-white' : 'text-[#5e6572] hover:text-[#2170e4]')
+              className={`relative text-[#2170e4] hover:opacity-85 active:scale-95 transition-all w-10 h-10 flex items-center justify-center rounded-full ${
+                currentScreen === 'CART' ? 'bg-[#2170e4]/10' : (darkMode ? 'hover:bg-slate-800' : 'hover:bg-[#eff4ff]')
               }`}
+              title="View shopping bag"
             >
-              <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: currentScreen === 'CART' ? "'FILL' 1" : "'FILL' 0" }}>
-                shopping_cart
-              </span>
-              <span className="text-[10px] mt-0.5 tracking-wide">Bag</span>
+              <span className="material-symbols-outlined select-none text-2xl">shopping_cart</span>
               {cartBadgeCount > 0 && (
-                <span className="absolute -top-1.5 right-1 w-4 h-4 bg-[#2170e4] text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white">
+                <span className={`absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-600 text-white text-[10px] uppercase font-bold flex items-center justify-center rounded-full animate-pulse border ${
+                  darkMode ? 'border-[#090d16]' : 'border-white'
+                }`}>
                   {cartBadgeCount}
                 </span>
               )}
-              {currentScreen === 'CART' && (
-                <span className="w-1 h-1 bg-[#2170e4] rounded-full mt-0.5 absolute bottom-0.5" />
-              )}
-            </button>
-
-            <button 
-              onClick={() => setCurrentScreen('PROFILE')}
-              className={`flex flex-col items-center justify-center transition-all duration-150 active:scale-90 ${
-                currentScreen === 'PROFILE' 
-                  ? 'text-[#2170e4] font-semibold scale-105' 
-                  : (darkMode ? 'text-slate-400 hover:text-white' : 'text-[#5e6572] hover:text-[#2170e4]')
-              }`}
-            >
-              <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: currentScreen === 'PROFILE' ? "'FILL' 1" : "'FILL' 0" }}>
-                person
-              </span>
-              <span className="text-[10px] mt-0.5 tracking-wide">Profile</span>
-              {currentScreen === 'PROFILE' && (
-                <span className="w-1 h-1 bg-[#2170e4] rounded-full mt-0.5 absolute bottom-0.5" />
-              )}
             </button>
           </div>
-        </nav>
+
+        </div>
+      </header>
+
+      {/* Main Content Area - Full-width Grid Wrapper */}
+      <main className="flex-grow max-w-7xl w-full mx-auto px-4 md:px-6 pt-3 pb-24">
+        {currentScreen === 'HOME' && (
+          <Home 
+            onSelectProduct={handleSelectProduct}
+            onAddToCart={handleAddToCart}
+            onNavigate={setCurrentScreen}
+            setSearchKeywordFilter={setSearchKeyword}
+            isMobileLayout={false}
+            darkMode={darkMode}
+          />
+        )}
+
+        {currentScreen === 'CATALOG' && (
+          <Catalog 
+            onSelectProduct={handleSelectProduct}
+            onAddToCart={handleAddToCart}
+            keywordFilter={searchKeyword}
+            setKeywordFilter={setSearchKeyword}
+            isMobileLayout={false}
+            darkMode={darkMode}
+          />
+        )}
+
+        {currentScreen === 'PRODUCT_DETAIL' && (
+          <ProductDetail 
+            product={activeProduct}
+            onBack={() => {
+              setCurrentScreen('CATALOG');
+            }}
+            onAddToCart={handleAddToCart}
+            onShare={handleShareProduct}
+            isMobileLayout={false}
+            darkMode={darkMode}
+          />
+        )}
+
+        {currentScreen === 'CART' && (
+          <Cart 
+            cartItems={cartItems}
+            onUpdateQuantity={handleUpdateQuantity}
+            onRemoveItem={handleRemoveItem}
+            onClearCart={handleClearCart}
+            onCheckoutComplete={handleCheckoutComplete}
+            isMobileLayout={false}
+            darkMode={darkMode}
+          />
+        )}
+
+        {currentScreen === 'PROFILE' && (
+          <Profile 
+            userEmail={userEmail}
+            onChangeEmail={setUserEmail}
+            darkMode={darkMode}
+          />
+        )}
+
+        {currentScreen === 'ADMIN' && (
+          <Admin 
+            orders={orders} 
+            onUpdateOrderStatus={handleUpdateOrderStatus} 
+            products={PRODUCTS} 
+            onResetDatabase={handleResetDatabase}
+            darkMode={darkMode}
+          />
+        )}
+      </main>
+
+      {/* Floating System Toast Alerts */}
+      <div 
+        className={`fixed bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 bg-[#27313f] text-[#eaf1ff] px-5 py-3 rounded-full text-xs font-semibold shadow-2xl z-[100] transition-all duration-300 flex items-center gap-2 max-w-xs whitespace-nowrap pointer-events-none ${
+          toastMessage ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+        }`}
+      >
+        <span className="material-symbols-outlined text-emerald-400 text-sm">offline_pin</span>
+        <span>{toastMessage}</span>
       </div>
+
+      {/* Premium Drawer Side Menu */}
+      <Sidebar 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        onNavigate={setCurrentScreen}
+        currentScreen={currentScreen}
+        userEmail={userEmail}
+        darkMode={darkMode}
+        onToggleDarkMode={() => setDarkMode(!darkMode)}
+      />
+
+      {/* Responsive Bottom Navigation Indicator Bar (Visible on Mobile only!) */}
+      <nav className={`fixed bottom-0 left-0 w-full z-45 border-t shadow-2xl flex justify-center py-2 px-4 h-16 transition-colors md:hidden ${
+        darkMode ? 'bg-[#090d16]/95 border-[#1e293b]' : 'bg-white/95 border-[#dee9fc]'
+      }`}>
+        <div className="flex justify-around items-center w-full max-w-lg relative">
+          <button 
+            onClick={() => setCurrentScreen('HOME')}
+            className={`flex flex-col items-center justify-center transition-all duration-150 active:scale-90 ${
+              currentScreen === 'HOME' 
+                ? 'text-[#2170e4] font-semibold scale-105' 
+                : (darkMode ? 'text-slate-400 hover:text-white' : 'text-[#5e6572] hover:text-[#2170e4]')
+            }`}
+          >
+            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: currentScreen === 'HOME' ? "'FILL' 1" : "'FILL' 0" }}>
+              home
+            </span>
+            <span className="text-[10px] mt-0.5 tracking-wide font-medium">Asosiy</span>
+          </button>
+
+          <button 
+            onClick={() => setCurrentScreen('CATALOG')}
+            className={`flex flex-col items-center justify-center transition-all duration-150 active:scale-90 ${
+              currentScreen === 'CATALOG' 
+                ? 'text-[#2170e4] font-semibold scale-105' 
+                : (darkMode ? 'text-slate-400 hover:text-white' : 'text-[#5e6572] hover:text-[#2170e4]')
+            }`}
+          >
+            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: currentScreen === 'CATALOG' ? "'FILL' 1" : "'FILL' 0" }}>
+              search
+            </span>
+            <span className="text-[10px] mt-0.5 tracking-wide font-medium">Katalog</span>
+          </button>
+
+          <button 
+            onClick={() => setCurrentScreen('CART')}
+            className={`flex flex-col items-center justify-center transition-all duration-150 active:scale-90 relative ${
+              currentScreen === 'CART' 
+                ? 'text-[#2170e4] font-semibold scale-105' 
+                : (darkMode ? 'text-slate-400 hover:text-white' : 'text-[#5e6572] hover:text-[#2170e4]')
+            }`}
+          >
+            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: currentScreen === 'CART' ? "'FILL' 1" : "'FILL' 0" }}>
+              shopping_cart
+            </span>
+            <span className="text-[10px] mt-0.5 tracking-wide font-medium">Savat</span>
+            {cartBadgeCount > 0 && (
+              <span className="absolute -top-1.5 right-1 w-4.5 h-4.5 bg-red-600 text-white text-[9px] font-bold flex items-center justify-center rounded-full border border-white">
+                {cartBadgeCount}
+              </span>
+            )}
+          </button>
+
+          <button 
+            onClick={() => setCurrentScreen('PROFILE')}
+            className={`flex flex-col items-center justify-center transition-all duration-150 active:scale-90 ${
+              currentScreen === 'PROFILE' 
+                ? 'text-[#2170e4] font-semibold scale-105' 
+                : (darkMode ? 'text-slate-400 hover:text-white' : 'text-[#5e6572] hover:text-[#2170e4]')
+            }`}
+          >
+            <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: currentScreen === 'PROFILE' ? "'FILL' 1" : "'FILL' 0" }}>
+              person
+            </span>
+            <span className="text-[10px] mt-0.5 tracking-wide font-medium">Profil</span>
+          </button>
+        </div>
+      </nav>
+
     </div>
   );
 }
