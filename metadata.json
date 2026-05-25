@@ -1,0 +1,6 @@
+{
+  "name": "Luxe Mobile Market",
+  "description": "A highly polished, premium mobile e-commerce application styled with modern Tailwind CSS and interactive transitions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
