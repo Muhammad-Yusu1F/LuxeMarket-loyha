@@ -10,6 +10,12 @@ import ProductDetail from './components/ProductDetail';
 import Cart from './components/Cart';
 import Profile from './components/Profile';
 import Admin from './components/Admin';
+import Auth from './components/Auth';
+
+// Firebase imports
+import { db, isFirebaseConfigured, handleFirestoreError, OperationType } from './lib/firebase';
+import { collection, setDoc, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
+
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenState>('HOME');
@@ -17,6 +23,11 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [deviceMode, setDeviceMode] = useState<'responsive' | 'mobile'>('responsive');
+
+  // Authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('luxe_authenticated') === 'true';
+  });
 
   // Dark mode state with persistence in localStorage
   const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -26,7 +37,7 @@ export default function App() {
 
   // User email state with persistence in localStorage
   const [userEmail, setUserEmail] = useState<string>(() => {
-    return localStorage.getItem('luxe_user_email') || 'alex.morgan@luxe.com';
+    return localStorage.getItem('luxe_user_email') || '';
   });
 
   // Update document state on theme change
@@ -87,13 +98,62 @@ export default function App() {
     ];
   });
 
-  // Track state changes to preserve orders
+  // Helper to sync from the centralized backend server
+  const fetchOrdersFromServer = async () => {
+    try {
+      const response = await fetch('/api/orders');
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data);
+        localStorage.setItem('luxe_orders', JSON.stringify(data));
+      }
+    } catch (e) {
+      console.warn("Express backend orders sync silent fail (normal in preview):", e);
+    }
+  };
+
+  // Real-time syncing with centralized backend
+  useEffect(() => {
+    fetchOrdersFromServer();
+    const interval = setInterval(fetchOrdersFromServer, 4000); // poll every 4 seconds to sync orders instantly across all devices
+    return () => clearInterval(interval);
+  }, []);
+
+  // Track state changes to preserve orders (for local redundancy)
   useEffect(() => {
     localStorage.setItem('luxe_orders', JSON.stringify(orders));
   }, [orders]);
 
+  // Auth Success Handler
+  const handleAuthSuccess = (email: string) => {
+    setUserEmail(email);
+    setIsAuthenticated(true);
+    localStorage.setItem('luxe_authenticated', 'true');
+    localStorage.setItem('luxe_user_email', email);
+    
+    // Redirect Admin directly to the orders panel
+    const cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail === 'ybegimqulov01@gmail.com' || cleanEmail === 'ybeginqulov01@gmail.com') {
+      setCurrentScreen('ADMIN');
+      triggerToast('Xush kelibsiz, Admin Begimqulov! Barcha buyurtmalar yuklanmoqda...');
+    } else {
+      setCurrentScreen('HOME');
+      triggerToast('Siz tizimga muvaffaqiyatli kirdingiz!');
+    }
+  };
+
+  // Auth Logout Handler
+  const handleLogout = () => {
+    setUserEmail('');
+    setIsAuthenticated(false);
+    localStorage.removeItem('luxe_authenticated');
+    localStorage.removeItem('luxe_user_email');
+    setCurrentScreen('HOME');
+    triggerToast('Tizimdan chiqdingiz!');
+  };
+
   // Handle order purchase submission from cart screen form
-  const handleCheckoutComplete = (customer: {
+  const handleCheckoutComplete = async (customer: {
     name: string;
     phone: string;
     email: string;
@@ -103,9 +163,10 @@ export default function App() {
     const subtotal = cartItems.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
     const estTax = subtotal * 0.08;
     const total = subtotal + estTax;
+    const orderId = `LUXE-${Math.floor(Math.random() * 899999 + 100000)}`;
 
     const newOrder: Order = {
-      id: `LUXE-${Math.floor(Math.random() * 899999 + 100000)}`,
+      id: orderId,
       customerName: customer.name,
       customerPhone: customer.phone,
       customerEmail: customer.email,
@@ -114,24 +175,74 @@ export default function App() {
       totalPrice: total,
       status: 'PENDING',
       createdAt: new Date().toISOString(),
-      notes: customer.notes
+      notes: customer.notes || ""
     };
 
-    setOrders(prev => [newOrder, ...prev]);
-    triggerToast('Luxury order notification sent to merchant!');
+    try {
+      const resp = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newOrder)
+      });
+      if (resp.ok) {
+        triggerToast('Premium buyurtma serverga muvaffaqiyatli jo‘natildi!');
+        fetchOrdersFromServer();
+        handleClearCart();
+      } else {
+        throw new Error("Server response error");
+      }
+    } catch (e) {
+      console.warn("Express sync fail, falling back to local state:", e);
+      setOrders(prev => [newOrder, ...prev]);
+      triggerToast('Buyurtma saqlandi (Mahalliy)!');
+      handleClearCart();
+    }
   };
 
   // Status changer for merchant admin
-  const handleUpdateOrderStatus = (orderId: string, status: Order['status']) => {
-    setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
-    triggerToast(`Order status updated to ${status}`);
+  const handleUpdateOrderStatus = async (orderId: string, status: Order['status']) => {
+    try {
+      const resp = await fetch(`/api/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      });
+      if (resp.ok) {
+        triggerToast(`Buyurtma holati "${status}" ga yangilandi`);
+        fetchOrdersFromServer();
+      } else {
+        throw new Error("Server status update failed");
+      }
+    } catch (e) {
+      console.warn("Express status update fail, falling back to local state:", e);
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+      triggerToast(`Buyurtma holati "${status}" ga yangilandi`);
+    }
   };
 
   // Reset database/clear history helper
-  const handleResetDatabase = () => {
-    setOrders([]);
-    triggerToast('All test orders cleared');
+  const handleResetDatabase = async () => {
+    try {
+      const resp = await fetch('/api/orders/reset', {
+        method: 'POST'
+      });
+      if (resp.ok) {
+        triggerToast('Barcha buyurtmalar o‘chirildi');
+        fetchOrdersFromServer();
+      } else {
+        throw new Error("Reset failed");
+      }
+    } catch (e) {
+      console.warn("Express reset fail, falling back to local state:", e);
+      setOrders([]);
+      triggerToast('All test orders cleared');
+    }
   };
+
 
   // Toast notification state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -221,6 +332,18 @@ export default function App() {
   // Active product details helper
   const activeProduct = PRODUCTS.find(p => p.id === selectedProductId) || PRODUCTS[0];
 
+  const isAdmin = userEmail.trim().toLowerCase() === 'ybegimqulov01@gmail.com' || userEmail.trim().toLowerCase() === 'ybeginqulov01@gmail.com';
+
+  if (!isAuthenticated) {
+    return (
+      <div className={`w-full min-h-screen transition-colors duration-300 flex flex-col items-center justify-center ${
+        darkMode ? 'bg-[#090d16] text-[#f1f5f9]' : 'bg-[#f8f9ff] text-[#121c2a]'
+      }`}>
+        <Auth onSuccess={handleAuthSuccess} darkMode={darkMode} />
+      </div>
+    );
+  }
+
   return (
     <div className={`w-full min-h-screen transition-colors duration-300 flex flex-col ${
       darkMode ? 'bg-[#090d16] text-[#f1f5f9]' : 'bg-[#f8f9ff] text-[#121c2a]'
@@ -241,12 +364,20 @@ export default function App() {
           <div className="flex items-center gap-5">
             <span className="hover:text-[#2170e4] transition-colors cursor-pointer font-medium">Sotuvchi bo'lish</span>
             <span className="hover:text-[#2170e4] transition-colors cursor-pointer">Savol-javoblar</span>
-            <span className="hover:text-[#2170e4] transition-colors cursor-pointer text-[#2170e4] font-medium" onClick={() => setCurrentScreen('ADMIN')}>
-              🛡️ Buyurtmalarim (Admin)
-            </span>
+            {isAdmin && (
+              <span className="hover:text-[#2170e4] transition-colors cursor-pointer text-[#2170e4] font-medium" onClick={() => setCurrentScreen('ADMIN')}>
+                🛡️ Buyurtmalarim (Admin)
+              </span>
+            )}
             <span className="text-[11px] bg-[#2170e4]/10 text-[#2170e4] px-2 py-0.5 rounded font-mono">
               {userEmail}
             </span>
+            <button 
+              onClick={handleLogout}
+              className="text-red-500 hover:text-red-600 transition-colors font-medium cursor-pointer"
+            >
+              Chiqish 🚪
+            </button>
           </div>
         </div>
       </div>
@@ -340,15 +471,17 @@ export default function App() {
             </button>
 
             {/* Admin Panel button */}
-            <button 
-              onClick={() => setCurrentScreen('ADMIN')}
-              className={`hidden sm:flex text-[#2170e4] hover:opacity-85 active:scale-95 transition-all w-10 h-10 items-center justify-center rounded-full ${
-                currentScreen === 'ADMIN' ? (darkMode ? 'bg-amber-500/15 text-amber-500' : 'bg-amber-50 text-amber-600') : (darkMode ? 'hover:bg-slate-800' : 'hover:bg-[#eff4ff]')
-              }`}
-              title="Merchant Admin Panel"
-            >
-              <span className="material-symbols-outlined select-none text-2xl">admin_panel_settings</span>
-            </button>
+            {isAdmin && (
+              <button 
+                onClick={() => setCurrentScreen('ADMIN')}
+                className={`hidden sm:flex text-[#2170e4] hover:opacity-85 active:scale-95 transition-all w-10 h-10 items-center justify-center rounded-full ${
+                  currentScreen === 'ADMIN' ? (darkMode ? 'bg-amber-500/15 text-amber-500' : 'bg-amber-50 text-amber-600') : (darkMode ? 'hover:bg-slate-800' : 'hover:bg-[#eff4ff]')
+                }`}
+                title="Merchant Admin Panel"
+              >
+                <span className="material-symbols-outlined select-none text-2xl">admin_panel_settings</span>
+              </button>
+            )}
 
             {/* Profile Navigation */}
             <button 

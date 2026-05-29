@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Orders Collection
+    match /orders/{orderId} {
+      // Allow creation of order if signed in
+      allow create: if request.auth != null 
+        && request.resource.data.id == orderId
+        && request.resource.data.customerEmail == request.auth.token.email
+        && request.resource.data.customerName is string
+        && request.resource.data.customerPhone is string
+        && request.resource.data.totalPrice is number;
+      
+      // Allow read if signed in and is either the admin or the owner of the order
+      allow read: if request.auth != null && (
+        request.auth.token.email == "ybegimqulov01@gmail.com" || 
+        resource.data.customerEmail == request.auth.token.email
+      );
+
+      // Allow update only for the admin "ybegimqulov01@gmail.com"
+      allow update: if request.auth != null 
+        && request.auth.token.email == "ybegimqulov01@gmail.com"
+        && request.resource.data.id == resource.data.id;
+      
+      // No deletes allowed for safety
+      allow delete: if false;
+    }
+  }
+}

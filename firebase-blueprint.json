@@ -1,0 +1,64 @@
+{
+  "entities": {
+    "Order": {
+      "title": "Order",
+      "description": "Premium order detail for global checkout synchronization",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "customerName": {
+          "type": "string"
+        },
+        "customerPhone": {
+          "type": "string"
+        },
+        "customerEmail": {
+          "type": "string"
+        },
+        "customerAddress": {
+          "type": "string"
+        },
+        "totalPrice": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "PENDING",
+            "CONFIRMED",
+            "SHIPPED",
+            "DELIVERED"
+          ]
+        },
+        "createdAt": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "customerName",
+        "customerPhone",
+        "customerEmail",
+        "customerAddress",
+        "totalPrice",
+        "status",
+        "createdAt",
+        "items"
+      ]
+    }
+  },
+  "firestore": {
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Global collection containing all customer luxury orders"
+    }
+  }
+}
