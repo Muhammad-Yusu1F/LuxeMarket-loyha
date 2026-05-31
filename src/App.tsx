@@ -200,7 +200,7 @@ export default function App() {
     
     // Redirect Admin directly to the orders panel
     const cleanEmail = email.trim().toLowerCase();
-    if (cleanEmail === 'ybegimqulov01@gmail.com' || cleanEmail === 'ybeginqulov01@gmail.com') {
+    if (cleanEmail === 'ybegimqulov01@gmail.com') {
       setCurrentScreen('ADMIN');
       triggerToast('Xush kelibsiz, Admin Begimqulov! Barcha buyurtmalar yuklanmoqda...');
     } else {
@@ -399,7 +399,7 @@ export default function App() {
   // Active product details helper
   const activeProduct = products.find(p => p.id === selectedProductId) || products[0] || PRODUCTS[0];
 
-  const isAdmin = userEmail.trim().toLowerCase() === 'ybegimqulov01@gmail.com' || userEmail.trim().toLowerCase() === 'ybeginqulov01@gmail.com';
+  const isAdmin = userEmail.trim().toLowerCase() === 'ybegimqulov01@gmail.com';
 
   if (!isAuthenticated) {
     return (

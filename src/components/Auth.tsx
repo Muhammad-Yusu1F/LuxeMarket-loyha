@@ -30,24 +30,9 @@ export default function Auth({ onSuccess, darkMode }: AuthProps) {
       return;
     }
 
-    // Check custom admin credentials
+    // Check credentials (any password of >= 6 chars is accepted per user request)
     const cleanEmail = email.trim().toLowerCase();
-    if (cleanEmail === 'ybegimqulov01@gmail.com' || cleanEmail === 'ybeginqulov01@gmail.com') {
-      if (password === '332041106') {
-        // Success login as admin
-        setTimeout(() => {
-          setLoading(false);
-          onSuccess(cleanEmail);
-        }, 800);
-        return;
-      } else {
-        setError('Noto‘g‘ri parol kiritdingiz!');
-        setLoading(false);
-        return;
-      }
-    }
-
-    // For any other user, succeed automatically or register
+    
     setTimeout(() => {
       setLoading(false);
       onSuccess(cleanEmail);

@@ -21,7 +21,7 @@ export default function Sidebar({
   darkMode, 
   onToggleDarkMode 
 }: SidebarProps) {
-  const isAdmin = userEmail.trim().toLowerCase() === 'ybegimqulov01@gmail.com' || userEmail.trim().toLowerCase() === 'ybeginqulov01@gmail.com';
+  const isAdmin = userEmail.trim().toLowerCase() === 'ybegimqulov01@gmail.com';
 
   return (
     <div 

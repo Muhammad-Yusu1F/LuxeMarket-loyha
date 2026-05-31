@@ -41,7 +41,7 @@ export default function Profile({
     setNameInput(userName);
   }, [userName]);
 
-  const isAdmin = userEmail.trim().toLowerCase() === 'ybegimqulov01@gmail.com' || userEmail.trim().toLowerCase() === 'ybeginqulov01@gmail.com';
+  const isAdmin = userEmail.trim().toLowerCase() === 'ybegimqulov01@gmail.com';
 
   const handleSaveProfile = () => {
     if (!nameInput.trim()) {
