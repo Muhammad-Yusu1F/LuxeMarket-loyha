@@ -19,6 +19,7 @@ export interface Product {
     frequencyResponse?: string;
     driverDiameter?: string;
     charging?: string;
+    [key: string]: string | undefined;
   };
   additionalImages?: string[];
 }

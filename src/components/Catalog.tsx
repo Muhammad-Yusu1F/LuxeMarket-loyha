@@ -1,8 +1,8 @@
 import { Product } from '../types';
-import { PRODUCTS } from '../data';
 import { useState, useEffect } from 'react';
 
 interface CatalogProps {
+  products: Product[];
   onSelectProduct: (productId: string) => void;
   onAddToCart: (product: Product) => void;
   keywordFilter: string;
@@ -12,6 +12,7 @@ interface CatalogProps {
 }
 
 export default function Catalog({ 
+  products,
   onSelectProduct, 
   onAddToCart, 
   keywordFilter, 
@@ -48,7 +49,7 @@ export default function Catalog({
   };
 
   // Apply filters and sorting
-  let filteredList = PRODUCTS.filter(p => {
+  let filteredList = products.filter(p => {
     // 1. Search keyword matching
     const matchesSearch = 
       p.name.toLowerCase().includes(searchWord.toLowerCase()) ||
@@ -86,7 +87,7 @@ export default function Catalog({
               ? 'bg-[#172036] border-[#1e293b] text-white placeholder:text-slate-500' 
               : 'bg-[#eff4ff] border-[#c2c6d6] text-[#121c2a] placeholder:text-[#5e6572]'
           }`} 
-          placeholder="Search premium catalog..." 
+          placeholder="Premium katalogdan mahsulotlarni qidirish..." 
           type="text"
           value={searchWord}
           onChange={(e) => handleKeywordChange(e.target.value)}
@@ -121,7 +122,7 @@ export default function Catalog({
           }`}
         >
           <span className="material-symbols-outlined text-[16px]">tune</span>
-          Reset Filters
+          Hamma filtrlar
         </button>
 
         {/* Price sort button */}
@@ -139,7 +140,7 @@ export default function Catalog({
                 : 'bg-[#dce2f3] text-[#5e6572] hover:bg-[#c0c7d6]'
           }`}
         >
-          Sort: {sortByPriceDesc === null ? 'Standard' : sortByPriceDesc ? 'Price: High-Low' : 'Price: Low-High'}
+          Saralash: {sortByPriceDesc === null ? 'Standart' : sortByPriceDesc ? 'Narx: Qimmatdan-Arzon' : 'Narx: Arzondan-Qimmat'}
           <span className="material-symbols-outlined text-[14px]">
             {sortByPriceDesc === null ? 'swap_vert' : sortByPriceDesc ? 'arrow_downward' : 'arrow_upward'}
           </span>
@@ -156,7 +157,7 @@ export default function Catalog({
                 : 'bg-[#dce2f3] text-[#5e6572] hover:bg-[#c0c7d6]'
           }`}
         >
-          Category: Tech
+          Turkum: Elektronika
         </button>
 
         {/* Rating button */}
@@ -170,7 +171,7 @@ export default function Catalog({
                 : 'bg-[#dce2f3] text-[#5e6572] hover:bg-[#c0c7d6]'
           }`}
         >
-          Rating: 4.5+ ★
+          Reyting: 4.5+ ★
         </button>
       </div>
 
@@ -178,7 +179,7 @@ export default function Catalog({
       <div>
         <div className="flex justify-between items-center mb-4">
           <p className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-[#727785]'}`}>
-            Displaying {filteredList.length} Luxe Products
+            Jami {filteredList.length} ta premium mahsulot topildi
           </p>
           {(filterTechOnly || filterHighRating || sortByPriceDesc !== null || searchWord) && (
             <button 
@@ -188,9 +189,9 @@ export default function Catalog({
                 setSortByPriceDesc(null);
                 handleKeywordChange('');
               }}
-              className="text-xs text-[#2170e4] hover:underline"
+              className="text-xs text-[#2170e4] hover:underline font-semibold"
             >
-              Clear all
+              Tozalash
             </button>
           )}
         </div>
@@ -200,13 +201,13 @@ export default function Catalog({
             darkMode ? 'bg-[#111726]/80 text-white border-[#1e293b]' : 'bg-white border-[#e6eeff] text-[#121c2a]'
           }`}>
             <span className="material-symbols-outlined text-4xl text-[#727785]">search_off</span>
-            <p className="font-semibold text-[#121c2a]">No Match Found</p>
+            <p className="font-semibold text-[#121c2a]">Mahsulot topilmadi</p>
             <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-[#424754]'}`}>
-              We can't find anything matching your filters. Try search keywords, reset filters, or view all items.
+              Kechirasiz, izlanayotgan ko‘rsatkich yoki filtrlarga mos keladigan mahsulotlar hozircha yo‘q.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 max-w-6xl mx-auto">
             {filteredList.map((p) => {
               const hasFave = favorites.includes(p.id);
               return (
@@ -220,7 +221,7 @@ export default function Catalog({
                   }`}>
                     <img 
                       alt={p.name} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 select-none"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 select-none"
                       src={p.image}
                     />
                     <button 
@@ -228,8 +229,8 @@ export default function Catalog({
                         e.stopPropagation();
                         toggleFavorite(p.id);
                       }}
-                      className="absolute top-2.5 right-2.5 p-2 bg-white/80 select-none backdrop-blur-md rounded-full text-[#424754] shadow-sm hover:scale-105 active:scale-90 transition-transform"
-                      title={hasFave ? 'Remove from favorites' : 'Add to favorites'}
+                      className="absolute top-2.5 right-2.5 p-2 bg-white/80 select-none backdrop-blur-md rounded-full text-[#424754] shadow-sm hover:scale-110 active:scale-90 transition-transform"
+                      title={hasFave ? 'Saralanganlardan o‘chirish' : 'Saralanganlarga qo‘shish'}
                     >
                       <span 
                         className={`material-symbols-outlined text-[18px] transition-colors ${
@@ -255,7 +256,7 @@ export default function Catalog({
                     </div>
                     <div className="flex justify-between items-center mt-1">
                       <span className={`font-bold text-sm ${darkMode ? 'text-blue-400' : 'text-[#0058be]'}`}>
-                        ${p.price.toFixed(2)}
+                        {p.price.toLocaleString('uz-UZ')} so'm
                       </span>
                       <button 
                         onClick={(e) => {
@@ -267,7 +268,7 @@ export default function Catalog({
                             ? 'bg-slate-800 text-blue-400 hover:bg-[#2170e4] hover:text-white' 
                             : 'bg-[#dee9fc] text-[#0058be] hover:bg-[#2170e4] hover:text-white'
                         }`}
-                        title="Quick add"
+                        title="Savatga qo‘shish"
                       >
                         <span className="material-symbols-outlined text-sm">add</span>
                       </button>

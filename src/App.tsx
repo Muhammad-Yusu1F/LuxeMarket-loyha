@@ -17,6 +17,20 @@ import { db, isFirebaseConfigured, handleFirestoreError, OperationType } from '.
 import { collection, setDoc, doc, updateDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 
+function extractNameFromEmail(email: string): string {
+  const clean = email.trim();
+  if (!clean) return 'Luxe Foydalanuvchisi';
+  const part = clean.split('@')[0];
+  return part
+    .split(/[\._\-]/)
+    .map(word => {
+      if (!word) return '';
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .filter(Boolean)
+    .join(' ');
+}
+
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenState>('HOME');
   const [selectedProductId, setSelectedProductId] = useState<string>('apex-ultra-wireless');
@@ -40,6 +54,17 @@ export default function App() {
     return localStorage.getItem('luxe_user_email') || '';
   });
 
+  // User name state with persistence in localStorage
+  const [userName, setUserName] = useState<string>(() => {
+    const savedName = localStorage.getItem('luxe_user_name');
+    if (savedName) return savedName;
+    const email = localStorage.getItem('luxe_user_email') || '';
+    if (email) {
+      return extractNameFromEmail(email);
+    }
+    return '';
+  });
+
   // Update document state on theme change
   useEffect(() => {
     localStorage.setItem('luxe_dark_mode', String(darkMode));
@@ -53,9 +78,46 @@ export default function App() {
   // Persist email changes
   useEffect(() => {
     localStorage.setItem('luxe_user_email', userEmail);
+    if (userEmail && !userName) {
+      const derived = extractNameFromEmail(userEmail);
+      setUserName(derived);
+      localStorage.setItem('luxe_user_name', derived);
+    }
   }, [userEmail]);
 
-  // Prepopulate cart with elements matching Image 4
+  // Persist name changes
+  useEffect(() => {
+    localStorage.setItem('luxe_user_name', userName);
+  }, [userName]);
+
+  // Persist user avatar changes
+  const [userAvatar, setUserAvatar] = useState<string>(() => {
+    return localStorage.getItem('luxe_user_avatar') || 'https://lh3.googleusercontent.com/aida-public/AB6AXuB8wJxhKjVUVbbRdfGKJSZ2mLpMgj5VQXcu7mycIfxyvbgntKROM-JANN7JcWVSCPrD4ObFx2WeUlCrzNv9CLtD9UY7iGrgIljBclDVfTRctGywv570dqZN-3EjL1iuGk7EuXU6iBDaWeog155zPJFkCoik9O20FQD4I7TMs2gFMvRAA3Oqnlih_rk9sw6f8rArF1GKqhB_omthqMQDNjxYk2fBisDzFgl_430yEwqwJXKazWKKDQMRCAF_lb9cIDUy71YYzs9CKI9H';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('luxe_user_avatar', userAvatar);
+  }, [userAvatar]);
+
+  // Dynamic products state with local persistence
+  const [products, setProducts] = useState<Product[]>(() => {
+    const saved = localStorage.getItem('luxe_products');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return PRODUCTS;
+      }
+    }
+    return PRODUCTS;
+  });
+
+  // Keep products state serialized to local storage
+  useEffect(() => {
+    localStorage.setItem('luxe_products', JSON.stringify(products));
+  }, [products]);
+
+  // Empty cart state by default (users can add whatever they wish)
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   // Real-time Order list with state persistence
@@ -71,29 +133,29 @@ export default function App() {
         customerName: 'Kamil Gulyamov',
         customerPhone: '+998 90 999 44 22',
         customerEmail: 'kamil@uzbekistan.com',
-        customerAddress: 'Tashkent, Oybek Business Center Apt 12',
+        customerAddress: 'Toshkent shahri, Oybek biznes markazi, 12-uy',
         items: [
           { product: PRODUCTS[0], quantity: 1 },
           { product: PRODUCTS[2], quantity: 2 }
         ],
-        totalPrice: PRODUCTS[0].price + (PRODUCTS[2].price * 2) * 1.08, // match calculation
+        totalPrice: Math.round((PRODUCTS[0].price + PRODUCTS[2].price * 2) * 1.12), // match calculation with 12% tax
         status: 'SHIPPED' as const,
         createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-        notes: 'Deliver to reception desk, please'
+        notes: 'Iltimos, qabulxonaga qoldiring'
       },
       {
         id: 'LUXE-142857',
         customerName: 'Yusupov Jamshid',
         customerPhone: '+998 94 456 78 90',
         customerEmail: 'jamshid@mail.ru',
-        customerAddress: 'Samarkand, Registan Square 1',
+        customerAddress: 'Samarqand shahri, Registon maydoni, 1-uy',
         items: [
           { product: PRODUCTS[1], quantity: 1 }
         ],
-        totalPrice: PRODUCTS[1].price * 1.08,
+        totalPrice: Math.round(PRODUCTS[1].price * 1.12),
         status: 'PENDING' as const,
         createdAt: new Date().toISOString(),
-        notes: 'Urgent premium birthday present!'
+        notes: 'Tug‘ilgan kun uchun shoshilinch sovg‘a!'
       }
     ];
   });
@@ -131,6 +193,11 @@ export default function App() {
     localStorage.setItem('luxe_authenticated', 'true');
     localStorage.setItem('luxe_user_email', email);
     
+    // Auto profile name from email
+    const autoName = extractNameFromEmail(email);
+    setUserName(autoName);
+    localStorage.setItem('luxe_user_name', autoName);
+    
     // Redirect Admin directly to the orders panel
     const cleanEmail = email.trim().toLowerCase();
     if (cleanEmail === 'ybegimqulov01@gmail.com' || cleanEmail === 'ybeginqulov01@gmail.com') {
@@ -145,9 +212,11 @@ export default function App() {
   // Auth Logout Handler
   const handleLogout = () => {
     setUserEmail('');
+    setUserName('');
     setIsAuthenticated(false);
     localStorage.removeItem('luxe_authenticated');
     localStorage.removeItem('luxe_user_email');
+    localStorage.removeItem('luxe_user_name');
     setCurrentScreen('HOME');
     triggerToast('Tizimdan chiqdingiz!');
   };
@@ -161,7 +230,7 @@ export default function App() {
     notes?: string;
   }) => {
     const subtotal = cartItems.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
-    const estTax = subtotal * 0.08;
+    const estTax = Math.round(subtotal * 0.12);
     const total = subtotal + estTax;
     const orderId = `LUXE-${Math.floor(Math.random() * 899999 + 100000)}`;
 
@@ -247,19 +316,7 @@ export default function App() {
   // Toast notification state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Load standard mockup items into cart on startup so that it matching Image 4
-  useEffect(() => {
-    const defaultRunner = PRODUCTS.find(p => p.id === 'velocity-pro-runner');
-    const defaultWatch = PRODUCTS.find(p => p.id === 'luxe-chrono-white');
-    const defaultHeadphones = PRODUCTS.find(p => p.id === 'acoustics-ultra-x');
-
-    const defaultCart: CartItem[] = [];
-    if (defaultRunner) defaultCart.push({ product: defaultRunner, quantity: 1 });
-    if (defaultWatch) defaultCart.push({ product: defaultWatch, quantity: 1 });
-    if (defaultHeadphones) defaultCart.push({ product: defaultHeadphones, quantity: 1 });
-
-    setCartItems(defaultCart);
-  }, []);
+  // Cart starts completely empty on launch per user instructions
 
   // Display a brief premium toast alert
   const triggerToast = (message: string) => {
@@ -274,14 +331,14 @@ export default function App() {
     setCartItems(prev => {
       const existing = prev.find(item => item.product.id === product.id);
       if (existing) {
-        triggerToast(`Added another ${product.name} to bag`);
+        triggerToast(`Savatga yana bitta ${product.name} qo‘shildi`);
         return prev.map(item => 
           item.product.id === product.id 
             ? { ...item, quantity: item.quantity + 1 } 
             : item
         );
       } else {
-        triggerToast(`Added ${product.name} to luxury bag`);
+        triggerToast(`${product.name} savatchaga qo‘shildi`);
         return [...prev, { product, quantity: 1 }];
       }
     });
@@ -295,8 +352,8 @@ export default function App() {
     }
     setCartItems(prev => prev.map(item => 
       item.product.id === productId 
-        ? { ...item, quantity: newQty } 
-        : item
+         ? { ...item, quantity: newQty } 
+         : item
     ));
   };
 
@@ -304,7 +361,7 @@ export default function App() {
   const handleRemoveItem = (productId: string) => {
     const item = cartItems.find(i => i.product.id === productId);
     if (item) {
-      triggerToast(`Removed ${item.product.name} from bag`);
+      triggerToast(`${item.product.name} savatchadan olib tashlandi`);
     }
     setCartItems(prev => prev.filter(item => item.product.id !== productId));
   };
@@ -323,14 +380,24 @@ export default function App() {
 
   // Share handle
   const handleShareProduct = (productName: string) => {
-    triggerToast(`Copied secure premium sharing link for ${productName}!`);
+    triggerToast(`${productName} uchun ulashish havolasi nusxalandi!`);
+  };
+
+  // Admin Product Controls
+  const handleAddProduct = (newProduct: Product) => {
+    setProducts(prev => [newProduct, ...prev]);
+  };
+
+  const handleDeleteProduct = (productId: string) => {
+    setProducts(prev => prev.filter(p => p.id !== productId));
+    setCartItems(prev => prev.filter(item => item.product.id !== productId));
   };
 
   // Get total quantity of items in the cart
   const cartBadgeCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   // Active product details helper
-  const activeProduct = PRODUCTS.find(p => p.id === selectedProductId) || PRODUCTS[0];
+  const activeProduct = products.find(p => p.id === selectedProductId) || products[0] || PRODUCTS[0];
 
   const isAdmin = userEmail.trim().toLowerCase() === 'ybegimqulov01@gmail.com' || userEmail.trim().toLowerCase() === 'ybeginqulov01@gmail.com';
 
@@ -522,6 +589,7 @@ export default function App() {
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 md:px-6 pt-3 pb-24">
         {currentScreen === 'HOME' && (
           <Home 
+            products={products}
             onSelectProduct={handleSelectProduct}
             onAddToCart={handleAddToCart}
             onNavigate={setCurrentScreen}
@@ -533,6 +601,7 @@ export default function App() {
 
         {currentScreen === 'CATALOG' && (
           <Catalog 
+            products={products}
             onSelectProduct={handleSelectProduct}
             onAddToCart={handleAddToCart}
             keywordFilter={searchKeyword}
@@ -571,6 +640,10 @@ export default function App() {
           <Profile 
             userEmail={userEmail}
             onChangeEmail={setUserEmail}
+            userName={userName}
+            onChangeName={setUserName}
+            userAvatar={userAvatar}
+            onChangeAvatar={setUserAvatar}
             darkMode={darkMode}
           />
         )}
@@ -579,7 +652,9 @@ export default function App() {
           <Admin 
             orders={orders} 
             onUpdateOrderStatus={handleUpdateOrderStatus} 
-            products={PRODUCTS} 
+            products={products} 
+            onAddProduct={handleAddProduct}
+            onDeleteProduct={handleDeleteProduct}
             onResetDatabase={handleResetDatabase}
             darkMode={darkMode}
           />
@@ -603,6 +678,7 @@ export default function App() {
         onNavigate={setCurrentScreen}
         currentScreen={currentScreen}
         userEmail={userEmail}
+        userName={userName}
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode(!darkMode)}
       />

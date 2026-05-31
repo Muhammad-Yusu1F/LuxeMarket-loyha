@@ -30,23 +30,23 @@ export default function Cart({
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkedOut, setCheckedOut] = useState(false);
 
-  // Form states
-  const [name, setName] = useState('Alex Morgan');
+  // Form states with Uzbek defaults
+  const [name, setName] = useState('Diyorbek Karimov');
   const [phone, setPhone] = useState('+998 90 123 45 67');
   const [email, setEmail] = useState('ybegimqulov01@gmail.com');
-  const [address, setAddress] = useState('Tashkent, Amir Temur Avenue 45');
+  const [address, setAddress] = useState('Toshkent shahri, Amir Temur ko‘chasi, 45-uy');
   const [notes, setNotes] = useState('');
 
-  // Subtotal Calculation
+  // Subtotal Calculation in so'm
   const subtotal = cartItems.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
-  const taxRate = 0.08; // 8% Est Tax
-  const estTax = subtotal * taxRate;
+  const taxRate = 0.12; // 12% QQS (Natsionalniy Nalog v UZ)
+  const estTax = Math.round(subtotal * taxRate);
   const total = subtotal + estTax;
 
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!name || !phone || !email || !address) {
-      alert('Please fill out all required fields');
+      alert('Iltimos, barcha majburiy maydonlarni to‘ldiring');
       return;
     }
     
@@ -79,26 +79,26 @@ export default function Cart({
           </span>
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-[#121c2a]">Order Completed!</h2>
-          <p className="text-sm text-[#424754] px-4">
-            Congratulations <strong>{name}</strong>! Your purchase of <strong className="text-[#0058be]">${total.toFixed(2)}</strong> was placed.
+          <h2 className="text-2xl font-bold text-[#121c2a] dark:text-white">Buyurtma muvaffaqiyatli qabul qilindi!</h2>
+          <p className="text-sm text-[#424754] dark:text-slate-300 px-4">
+            Tabriklaymiz, <strong>{name}</strong>! Sizning jami <strong>{total.toLocaleString('uz-UZ')} so'm</strong> miqdoridagi xaridingiz rasmiylashtirildi.
           </p>
-          <p className="text-xs text-[#727785] px-2">
-            A notification with item details has been securely dispatched to the store manager. Check the <strong>Admin Panel</strong> in the menu to verify or fulfill the order!
+          <p className="text-xs text-[#727785] dark:text-slate-400 px-2">
+            Xarid tafsilotlari do‘kon ma’muriga xavfsiz tarzda yuborildi. Buyurtmani tasdiqlash uchun menyudagi <strong>Admin Panel</strong> bo‘limiga kirishingiz mumkin!
           </p>
         </div>
-        <div className="bg-[#eff4ff] p-4 rounded-xl border border-[#c2c6d6]/60 text-xs text-left text-[#5e6572] space-y-2">
-          <p><strong>Customer:</strong> {name} ({phone})</p>
-          <p><strong>Address:</strong> {address}</p>
-          <p><strong>Status:</strong> Pending Merchant Approval</p>
-          <p><strong>Delivery:</strong> Express Courier 24H</p>
+        <div className="bg-[#eff4ff] dark:bg-slate-800 p-4 rounded-xl border border-[#c2c6d6]/60 dark:border-slate-700 text-xs text-left text-[#5e6572] dark:text-slate-300 space-y-2">
+          <p><strong>Xaridor:</strong> {name} ({phone})</p>
+          <p><strong>Manzil:</strong> {address}</p>
+          <p><strong>Holat:</strong> Ma’mur tasdig‘ini kutmoqda</p>
+          <p><strong>Yetkazib berish:</strong> 24 soat ichida tezyurar kuryer</p>
         </div>
         <button 
           id="btn-continue-checkout"
           onClick={handleResetCart}
           className="w-full bg-[#2170e4] hover:bg-[#0058be] text-white py-3 rounded-full font-semibold text-sm shadow-sm transition-colors"
         >
-          Continue Premium Shopping
+          Xarid qilishni davom ettirish
         </button>
       </div>
     );
@@ -109,19 +109,19 @@ export default function Cart({
       {/* Page Header */}
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h2 className={`text-22px font-semibold ${darkMode ? 'text-white' : 'text-[#121c2a]'}`}>Your Shopping Bag</h2>
+          <h2 className={`text-22px font-semibold ${darkMode ? 'text-white' : 'text-[#121c2a]'}`}>Sizning Savatingiz</h2>
           <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-[#424754]'}`}>
-            {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} currently in your cart
+            Hozirda savatda {cartItems.length} ta mahsulot bor
           </p>
         </div>
         {cartItems.length > 0 && !showCheckoutForm && (
           <button 
             id="clear-bag-btn"
             onClick={onClearCart}
-            className="text-xs font-semibold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
+            className="text-xs font-semibold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 animate-pulse"
           >
             <span className="material-symbols-outlined text-[14px]">remove_shopping_cart</span>
-            Clear Bag
+            Savatni tozalash
           </button>
         )}
       </div>
@@ -133,9 +133,9 @@ export default function Cart({
           <div className="w-16 h-16 bg-[#dee9fc] text-[#0058be] rounded-full flex items-center justify-center mx-auto">
             <span className="material-symbols-outlined text-2xl">shopping_cart_off</span>
           </div>
-          <p className="font-semibold text-base">Your bag is empty</p>
+          <p className="font-semibold text-base">Sizning savatingiz hozircha bo‘sh</p>
           <span className={`text-xs block max-w-xs mx-auto ${darkMode ? 'text-slate-400' : 'text-[#727785]'}`}>
-            Explore our signature collection of luxury devices and add them to your shopping cart.
+            Bizning milliy hamda global do‘konimiz mahsulotlaridan tanlang va ularni savatchaga qo‘shing.
           </span>
         </div>
       ) : (
@@ -153,20 +153,20 @@ export default function Cart({
                     type="button" 
                     onClick={() => setShowCheckoutForm(false)} 
                     className="text-[#2170e4] hover:bg-[#eff4ff]/10 w-8 h-8 rounded-full flex items-center justify-center"
-                    title="Back to items list"
+                    title="Savatga qaytish"
                   >
                     <span className="material-symbols-outlined">arrow_back</span>
                   </button>
                   <div>
-                    <h3 className="font-bold text-lg">Delivery & Contact</h3>
-                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-[#727785]'}`}>Provide details to finalize your luxury purchase</p>
+                    <h3 className="font-bold text-lg">Yetkazib berish va Aloqa</h3>
+                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-[#727785]'}`}>Xaridingizni rasmiylashtirish uchun ma’lumotlarni kiriting</p>
                   </div>
                 </div>
 
                 <form onSubmit={handleFormSubmit} className="space-y-4">
                   <div>
                     <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                      Full Name *
+                      To‘liq ism-sharifingiz *
                     </label>
                     <div className="relative">
                       <span className="material-symbols-outlined absolute left-3 top-2.5 text-xs text-slate-400">person</span>
@@ -178,7 +178,7 @@ export default function Cart({
                         className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#2170e4] border ${
                           darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-[#f8f9ff] border-[#dee9fc] text-[#121c2a]'
                         }`}
-                        placeholder="e.g. Alex Morgan"
+                        placeholder="Masalan, Diyorbek Karimov"
                       />
                     </div>
                   </div>
@@ -186,7 +186,7 @@ export default function Cart({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                        Phone Number *
+                        Telefon raqamingiz *
                       </label>
                       <div className="relative">
                         <span className="material-symbols-outlined absolute left-3 top-2.5 text-xs text-slate-400">phone</span>
@@ -198,14 +198,14 @@ export default function Cart({
                           className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#2170e4] border ${
                             darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-[#f8f9ff] border-[#dee9fc] text-[#121c2a]'
                           }`}
-                          placeholder="e.g. +998 90 123 4567"
+                          placeholder="Masalan, +998 90 123 4567"
                         />
                       </div>
                     </div>
 
                     <div>
                       <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                        Email Address *
+                        Elektron pochta manzilingiz *
                       </label>
                       <div className="relative">
                         <span className="material-symbols-outlined absolute left-3 top-2.5 text-xs text-slate-400">mail</span>
@@ -217,7 +217,7 @@ export default function Cart({
                           className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#2170e4] border ${
                             darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-[#f8f9ff] border-[#dee9fc] text-[#121c2a]'
                           }`}
-                          placeholder="e.g. alex@example.com"
+                          placeholder="Masalan, ybegimqulov01@gmail.com"
                         />
                       </div>
                     </div>
@@ -225,7 +225,7 @@ export default function Cart({
 
                   <div>
                     <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                      Shipping Address *
+                      Yetkazib berish manzili *
                     </label>
                     <div className="relative">
                       <span className="material-symbols-outlined absolute left-3 top-2.5 text-xs text-slate-400">pin_drop</span>
@@ -237,14 +237,14 @@ export default function Cart({
                         className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#2170e4] border ${
                           darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-[#f8f9ff] border-[#dee9fc] text-[#121c2a]'
                         }`}
-                        placeholder="e.g. Tashkent, Amir Temur Avenue 45"
+                        placeholder="Masalan, Toshkent shahri, Amir Temur ko‘chasi, 45-uy"
                       />
                     </div>
                   </div>
 
                   <div>
                     <label className={`block text-xs font-bold uppercase tracking-wider mb-1 ${darkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                      Delivery Notes / Requests (Optional)
+                      Kuryer uchun izoh (Ixtiyoriy)
                     </label>
                     <div className="relative">
                       <span className="material-symbols-outlined absolute left-3 top-2.5 text-xs text-slate-400">edit_note</span>
@@ -254,14 +254,14 @@ export default function Cart({
                         className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#2170e4] h-20 resize-none border ${
                           darkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-[#f8f9ff] border-[#dee9fc] text-[#121c2a]'
                         }`}
-                        placeholder="e.g. Call before delivery, ring second apartment doorbell..."
+                        placeholder="Masalan, Yetkazib berishdan oldin telefon qiling, ikkinchi yo‘lak eshigi..."
                       />
                     </div>
                   </div>
 
-                  <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 flex items-start gap-2 text-xs text-blue-800">
+                  <div className="p-3 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30 flex items-start gap-2 text-xs text-blue-800 dark:text-blue-300">
                     <span className="material-symbols-outlined text-sm mt-0.5">info</span>
-                    <span>This simulation logs the detailed purchase to the real-time store admin view for immediate merchant handling.</span>
+                    <span>Ushbu buyurtma admin tekshiruvi va yuklarni yetkazish uchun Admin Panel boshqaruv tizimida real vaqtda saqlab qolinadi.</span>
                   </div>
 
                   <div className="pt-2 flex gap-3">
@@ -269,9 +269,9 @@ export default function Cart({
                       id="btn-cancel-form"
                       type="button"
                       onClick={() => setShowCheckoutForm(false)}
-                      className="w-1/3 py-3 border border-[#dee9fc] text-slate-700 font-semibold rounded-full text-xs hover:bg-slate-50 transition"
+                      className="w-1/3 py-3 border border-[#dee9fc] text-slate-700 dark:text-slate-300 font-semibold rounded-full text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                     >
-                      Cancel
+                      Bekor qilish
                     </button>
                     <button 
                       id="btn-confirm-checkout"
@@ -281,11 +281,11 @@ export default function Cart({
                     >
                       {isCheckingOut ? (
                         <>
-                          <span className="animate-spin text-sm mr-1">⌛</span> Processing Secure Pay
+                          <span className="animate-spin text-sm mr-1">⌛</span> Buyurtma yuborilmoqda...
                         </>
                       ) : (
                         <>
-                          Confirm Purchase of ${total.toFixed(2)}
+                          Xaridni Tasdiqlash: {total.toLocaleString('uz-UZ')} so'm
                           <span className="material-symbols-outlined text-[16px]">verified_user</span>
                         </>
                       )}
@@ -300,27 +300,27 @@ export default function Cart({
                   const itemTotal = item.product.price * item.quantity;
                   
                   // Custom variant descriptions
-                  let variantSubtitle = 'Default Polish / OS';
+                  let variantSubtitle = 'Standart qadoq / Kafolatli';
                   if (item.product.id === 'velocity-pro-runner') {
-                    variantSubtitle = 'Electric Blue / Size 42';
+                    variantSubtitle = 'Moviy Neon rang / O‘lcham 42';
                   } else if (item.product.id === 'luxe-chrono-white') {
-                    variantSubtitle = 'Silver Polish / OS';
+                    variantSubtitle = 'Smart Premium Oq / OS';
                   } else if (item.product.id === 'acoustics-ultra-x') {
-                    variantSubtitle = 'Matte Black / OS';
+                    variantSubtitle = 'Professional Matli Qora / OS';
                   } else if (item.product.id === 'apex-ultra-wireless') {
-                    variantSubtitle = 'Standard Black / OS';
+                    variantSubtitle = 'Klassik To‘q Qora';
                   } else if (item.product.id === 'aurora-skin-regenerator') {
-                    variantSubtitle = 'Active Titanium Glow Edition';
+                    variantSubtitle = 'Faol Lazerli Terapiya Tizimi';
                   } else if (item.product.id === 'luna-gold-necklace') {
-                    variantSubtitle = '24K Solstice Solid link';
+                    variantSubtitle = 'Zargarlik toza oltin silsilasi';
                   }
 
                   return (
                     <div 
                       key={item.product.id}
-                      className="bg-white rounded-xl p-4 flex gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-[#e6eeff] transition-transform hover:scale-[1.01] duration-300"
+                      className="bg-white dark:bg-slate-850 rounded-xl p-4 flex gap-4 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-[#e6eeff] dark:border-slate-800 transition-transform hover:scale-[1.01] duration-300"
                     >
-                      <div className="w-24 h-28 md:w-28 md:h-32 flex-shrink-0 bg-[#f8f9ff] rounded-lg overflow-hidden border border-[#e6eeff]">
+                      <div className="w-24 h-28 md:w-28 md:h-32 flex-shrink-0 bg-[#f8f9ff] dark:bg-slate-800 rounded-lg overflow-hidden border border-[#e6eeff] dark:border-slate-700">
                         <img 
                           alt={item.product.name} 
                           className="w-full h-full object-cover" 
@@ -332,13 +332,13 @@ export default function Cart({
                         <div className="flex justify-between items-start gap-2">
                           <div>
                             <span className="text-[10px] uppercase font-bold text-[#2170e4] tracking-wider block">{item.product.brand}</span>
-                            <h3 className="font-semibold text-sm text-[#121c2a] line-clamp-1">{item.product.name}</h3>
-                            <p className="text-[11px] text-[#727785] mt-0.5">{variantSubtitle}</p>
+                            <h3 className="font-semibold text-sm text-[#121c2a] dark:text-white line-clamp-1">{item.product.name}</h3>
+                            <p className="text-[11px] text-[#727785] dark:text-slate-400 mt-0.5">{variantSubtitle}</p>
                           </div>
                           <button 
                             onClick={() => onRemoveItem(item.product.id)}
-                            className="text-[#727785] hover:text-red-500 p-1 rounded-full hover:bg-red-50 transition-colors"
-                            title="Delete item"
+                            className="text-[#727785] hover:text-red-500 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
+                            title="O‘chirish"
                           >
                             <span className="material-symbols-outlined text-[20px]">delete</span>
                           </button>
@@ -346,25 +346,25 @@ export default function Cart({
 
                         <div className="flex justify-between items-end gap-2 pt-2">
                           {/* Quantity Selector controls */}
-                          <div className="flex items-center gap-1 bg-[#eff4ff] rounded-full px-1.5 py-1 border border-[#c2c6d6]">
+                          <div className="flex items-center gap-1 bg-[#eff4ff] dark:bg-slate-800 rounded-full px-1.5 py-1 border border-[#c2c6d6] dark:border-slate-700">
                             <button 
                               onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
-                              className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#d9e3f6] text-[#121c2a] transition-all active:scale-90"
-                              title="Reduce quantity"
+                              className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#d9e3f6] dark:hover:bg-slate-700 text-[#121c2a] dark:text-white transition-all active:scale-90"
+                              title="Kamaytirish"
                               disabled={item.quantity <= 1}
                             >
                               <span className="material-symbols-outlined text-[16px]">remove</span>
                             </button>
-                            <span className="w-7 text-center font-bold text-xs text-[#121c2a]">{item.quantity}</span>
+                            <span className="w-7 text-center font-bold text-xs text-[#121c2a] dark:text-white">{item.quantity}</span>
                             <button 
                               onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
-                              className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#d9e3f6] text-[#121c2a] transition-all active:scale-90"
-                              title="Increase quantity"
+                              className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-[#d9e3f6] dark:hover:bg-slate-700 text-[#121c2a] dark:text-white transition-all active:scale-90"
+                              title="Ko‘paytirish"
                             >
                               <span className="material-symbols-outlined text-[16px]">add</span>
                             </button>
                           </div>
-                          <span className="font-bold text-base text-[#2170e4]">${itemTotal.toFixed(2)}</span>
+                          <span className="font-bold text-base text-[#2170e4]">{itemTotal.toLocaleString('uz-UZ')} so'm</span>
                         </div>
                       </div>
                     </div>
@@ -377,31 +377,31 @@ export default function Cart({
           {/* Right panel summary */}
           <div className="lg:col-span-5 space-y-4">
             <div className={`backdrop-blur-sm rounded-xl p-5 border shadow-sm space-y-4 transition-colors ${
-              darkMode ? 'bg-[#111726]/90 border-[#1e293b]' : 'bg-[#dee9fc]/70 border-[#c2c6d6]/40'
+              darkMode ? 'bg-[#111726]/90 border-[#1e293b] text-white' : 'bg-[#dee9fc]/70 border-[#c2c6d6]/40 text-[#121c2a]'
             }`}>
               <h3 className="font-semibold text-base flex items-center gap-2">
                 <span className="material-symbols-outlined text-[#2170e4]">payments</span>
-                Purchase Receipt
+                Xarid Cheki (Hisob-Kitob)
               </h3>
               
               <div className={`space-y-2 border-b pb-4 text-xs ${darkMode ? 'border-[#1e293b]/50 text-slate-350' : 'border-[#c2c6d6]/40 text-[#424754]'}`}>
                 <div className="flex justify-between">
-                  <span>Items total ({cartItems.reduce((acc, current) => acc + current.quantity, 0)})</span>
-                  <span className={`font-semibold ${darkMode ? 'text-white' : 'text-[#121c2a]'}`}>${subtotal.toFixed(2)}</span>
+                  <span>Mahsulotlar soni ({cartItems.reduce((acc, current) => acc + current.quantity, 0)} dona)</span>
+                  <span className={`font-semibold ${darkMode ? 'text-white' : 'text-[#121c2a]'}`}>{subtotal.toLocaleString('uz-UZ')} so'm</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Shipping Fee</span>
-                  <span className="text-emerald-500 font-bold uppercase tracking-wider">Free Express</span>
+                  <span>Yetkazib berish xizmati</span>
+                  <span className="text-emerald-500 font-bold uppercase tracking-wider">Bepul (Miliy Express)</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Estimated Tax (8%)</span>
-                  <span className={`font-semibold ${darkMode ? 'text-white' : 'text-[#121c2a]'}`}>${estTax.toFixed(2)}</span>
+                  <span>QQS solig‘i (12%)</span>
+                  <span className={`font-semibold ${darkMode ? 'text-white' : 'text-[#121c2a]'}`}>{estTax.toLocaleString('uz-UZ')} so'm</span>
                 </div>
               </div>
 
               <div className="flex justify-between font-bold text-base pt-1">
-                <span>Total Amount</span>
-                <span className="text-lg text-[#0058be]">${total.toFixed(2)}</span>
+                <span>Jami To‘lov</span>
+                <span className="text-lg text-[#0058be] dark:text-blue-400">{total.toLocaleString('uz-UZ')} so'm</span>
               </div>
 
               {!showCheckoutForm && (
@@ -410,14 +410,14 @@ export default function Cart({
                   onClick={() => setShowCheckoutForm(true)}
                   className="w-full bg-[#2170e4] hover:bg-[#0058be] text-white h-12 rounded-full font-semibold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md duration-200"
                 >
-                  Proceed to Secure Checkout
+                  Xaridni rasmiylashtirish
                   <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                 </button>
               )}
 
-              <div className="mt-2 flex items-center justify-center gap-1 text-[#5e6572] text-[10px] font-medium text-center">
+              <div className="mt-2 flex items-center justify-center gap-1 text-[#5e6572] dark:text-slate-400 text-[10px] font-medium text-center">
                 <span className="material-symbols-outlined text-[11px] text-emerald-600">verified</span>
-                Encrypted End-To-End Security
+                Shaxsiy ma’lumotlar shifrlangan va himoyalangan
               </div>
             </div>
 
@@ -428,9 +428,9 @@ export default function Cart({
               <span className="material-symbols-outlined text-[#2170e4] text-xl">workspace_premium</span>
               <div>
                 <p className={`text-xs font-semibold ${darkMode ? 'text-white' : 'text-[#424754]'}`}>
-                  Luxury Assurance Guaranteed
+                  100% Sifat Kafolati va xavfsizlik
                 </p>
-                <span className={`text-[10px] block mt-0.5 ${darkMode ? 'text-slate-400' : 'text-[#727785]'}`}>Every order is carefully inspected, validated, and shipped in bespoke hard cases with white-globe delivery service.</span>
+                <span className={`text-[10px] block mt-0.5 ${darkMode ? 'text-slate-400' : 'text-[#727785]'}`}>Sertifikatlangan kuryerlik tarmoqlarimiz xaridingiz butunligi, asar darajasida qadoqlanishi va uyingizgacha yetkazilishini ta’minlaydi.</span>
               </div>
             </div>
           </div>
