@@ -7,6 +7,7 @@ interface AdminProps {
   products: Product[];
   onAddProduct: (product: Product) => void;
   onDeleteProduct: (productId: string) => void;
+  onDeleteOrder: (orderId: string) => void;
   onResetDatabase?: () => void;
   darkMode?: boolean;
 }
@@ -17,6 +18,7 @@ export default function Admin({
   products, 
   onAddProduct,
   onDeleteProduct,
+  onDeleteOrder,
   onResetDatabase,
   darkMode = false
 }: AdminProps) {
@@ -615,13 +617,31 @@ export default function Admin({
                         }`}
                       >
                         <div className="flex justify-between items-start gap-2 mb-2">
-                           <div>
+                           <div className="flex-grow">
                             <span className="font-mono text-[10px] uppercase font-bold text-[#2170e4]">{o.id}</span>
                             <h4 className={`font-bold mt-0.5 ${darkMode ? 'text-white' : 'text-slate-900'}`}>{o.customerName}</h4>
                           </div>
-                          <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${badgeColor}`}>
-                            {uzStatus}
-                          </span>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full ${badgeColor}`}>
+                              {uzStatus}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm(`Haqiqatdan ham "${o.id}" buyurtmasini tizimdan o'chirib tashlamoqchimisiz?`)) {
+                                  onDeleteOrder(o.id);
+                                  if (selectedOrder && selectedOrder.id === o.id) {
+                                    setSelectedOrder(null);
+                                  }
+                                }
+                              }}
+                              className="p-1 text-slate-400 hover:text-rose-500 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800/80 transition"
+                              title="Buyurtmani o'chirish"
+                            >
+                              <span className="material-symbols-outlined text-[15px]">delete</span>
+                            </button>
+                          </div>
                         </div>
 
                         <div className="flex justify-between items-center text-[11px] pt-1">
@@ -733,36 +753,56 @@ export default function Admin({
                     {/* Order Action Controls */}
                     <div className={`space-y-2 text-xs border-t pt-4 ${darkMode ? 'border-slate-700/60' : 'border-slate-100'}`}>
                       <h4 className={`font-bold text-[10px] uppercase tracking-widest ${darkMode ? 'text-slate-400' : 'text-slate-700'}`}>Buyurtma holatini yangilash</h4>
-                      <div className="flex flex-wrap gap-2">
-                        <button 
-                          onClick={() => onUpdateOrderStatus(selectedOrder.id, 'CONFIRMED')}
-                          className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition ${
-                            selectedOrder.status === 'CONFIRMED' 
-                              ? 'bg-blue-600 text-white shadow-sm' 
-                              : `hover:bg-slate-200 ${darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700'}`
-                          }`}
+                      <div className="flex flex-wrap gap-2 justify-between items-center w-full">
+                        <div className="flex flex-wrap gap-2">
+                          <button 
+                            type="button"
+                            onClick={() => onUpdateOrderStatus(selectedOrder.id, 'CONFIRMED')}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition ${
+                              selectedOrder.status === 'CONFIRMED' 
+                                ? 'bg-blue-600 text-white shadow-sm' 
+                                : `hover:bg-slate-200 ${darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700'}`
+                            }`}
+                          >
+                            Tasdiqlash
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={() => onUpdateOrderStatus(selectedOrder.id, 'SHIPPED')}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition ${
+                              selectedOrder.status === 'SHIPPED' 
+                                ? 'bg-[#2170e4] text-white shadow-sm' 
+                                : `hover:bg-slate-200 ${darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700'}`
+                            }`}
+                          >
+                            Jo‘natish (Yo‘lda)
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={() => onUpdateOrderStatus(selectedOrder.id, 'DELIVERED')}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition ${
+                              selectedOrder.status === 'DELIVERED' 
+                                ? 'bg-emerald-600 text-white shadow-sm' 
+                                : `hover:bg-slate-200 ${darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700'}`
+                            }`}
+                          >
+                            Yetkazib berish (Yakunlash)
+                          </button>
+                        </div>
+                        
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm(`Haqiqatdan ham "${selectedOrder.id}" buyurtmasini butunlay o'chirib tashlamoqchimisiz?`)) {
+                              onDeleteOrder(selectedOrder.id);
+                              setSelectedOrder(null);
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-full text-[10px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/25 dark:hover:bg-rose-900/40 dark:text-rose-400 border border-rose-200/40 dark:border-rose-800/20 flex items-center gap-1 transition shadow-xs"
+                          title="Buyurtmani butunlay o'chirish"
                         >
-                          Tasdiqlash
-                        </button>
-                        <button 
-                          onClick={() => onUpdateOrderStatus(selectedOrder.id, 'SHIPPED')}
-                          className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition ${
-                            selectedOrder.status === 'SHIPPED' 
-                              ? 'bg-[#2170e4] text-white shadow-sm' 
-                              : `hover:bg-slate-200 ${darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700'}`
-                          }`}
-                        >
-                          Jo‘natish (Yo‘lda)
-                        </button>
-                        <button 
-                          onClick={() => onUpdateOrderStatus(selectedOrder.id, 'DELIVERED')}
-                          className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition ${
-                            selectedOrder.status === 'DELIVERED' 
-                              ? 'bg-emerald-600 text-white shadow-sm' 
-                              : `hover:bg-slate-200 ${darkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-700'}`
-                          }`}
-                        >
-                          Yetkazib berish (Yakunlash)
+                          <span className="material-symbols-outlined text-[12px]">delete</span>
+                          <span>O'chirish</span>
                         </button>
                       </div>
                     </div>

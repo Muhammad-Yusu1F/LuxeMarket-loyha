@@ -386,11 +386,23 @@ export default function App() {
   // Admin Product Controls
   const handleAddProduct = (newProduct: Product) => {
     setProducts(prev => [newProduct, ...prev]);
+    triggerToast(`"${newProduct.name}" muvaffaqiyatli qo‘shildi!`);
   };
 
   const handleDeleteProduct = (productId: string) => {
+    const productToDelete = products.find(p => p.id === productId);
     setProducts(prev => prev.filter(p => p.id !== productId));
     setCartItems(prev => prev.filter(item => item.product.id !== productId));
+    if (productToDelete) {
+      triggerToast(`"${productToDelete.name}" mahsuloti o‘chirildi!`);
+    } else {
+      triggerToast('Mahsulot muvaffaqiyatli o‘chirildi!');
+    }
+  };
+
+  const handleDeleteOrder = (orderId: string) => {
+    setOrders(prev => prev.filter(o => o.id !== orderId));
+    triggerToast(`"${orderId}" buyurtmasi muvaffaqiyatli o‘chirildi!`);
   };
 
   // Get total quantity of items in the cart
@@ -655,6 +667,7 @@ export default function App() {
             products={products} 
             onAddProduct={handleAddProduct}
             onDeleteProduct={handleDeleteProduct}
+            onDeleteOrder={handleDeleteOrder}
             onResetDatabase={handleResetDatabase}
             darkMode={darkMode}
           />
